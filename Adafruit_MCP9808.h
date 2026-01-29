@@ -43,6 +43,17 @@
 #define MCP9808_REG_DEVICE_ID 0x07    ///< device ID
 #define MCP9808_REG_RESOLUTION 0x08   ///< resolutin
 
+#define MCP9808_CONFIG_HYST_0C   0x0000  // Bits 10-9 = 00
+#define MCP9808_CONFIG_HYST_1_5C 0x0200  // Bits 10-9 = 01
+#define MCP9808_CONFIG_HYST_3C   0x0400  // Bits 10-9 = 10
+#define MCP9808_CONFIG_HYST_6C   0x0600  // Bits 10-9 = 11
+#define MCP9808_CONFIG_HYST_MASK 0x0600  // Mask for bits 10-9
+
+#define MCP9808_HYST_0C 		0
+#define MCP9808_HYST_1_5C		1
+#define MCP9808_HYST_3C			2
+#define MCP9808_HYST_6C			3
+
 /*!
  *    @brief  Class that stores state and functions for interacting with
  *            MCP9808 Temp Sensor
@@ -65,6 +76,27 @@ public:
   void shutdown();
   void wake();
 
+	// Temperature alert configuration functions
+  bool setUpperTemp(float temp);
+  bool setLowerTemp(float temp);
+  bool setCriticalTemp(float temp);
+  bool setAlertPolarity(bool activeHigh);
+  bool setAlertMode(bool interruptMode);
+  bool enableAlert(bool enable);
+  bool setAlertSelectCriticalOnly(bool critOnly);
+  
+	bool setHysteresis(uint8_t hyst);
+	uint8_t getHysteresis();
+
+  // Convenience function - sets critical temp and polarity, enables alert
+  bool setTempAlert(float temp, bool activeHigh, bool alertMode, uint8_t hysteresis, bool critOnly);
+  
+  // Read alert settings
+  float getUpperTemp();
+  float getLowerTemp();
+  float getCriticalTemp();
+  bool getAlertStatus();
+
   void write16(uint8_t reg, uint16_t val);
   uint16_t read16(uint8_t reg);
 
@@ -78,6 +110,9 @@ public:
 private:
   uint16_t _sensorID = 9808; ///< ID number for temperature
   Adafruit_I2CDevice *i2c_dev = NULL;
+  /* Helper Functions */
+  uint16_t tempToReg(float temp);
+  float regToTemp(uint16_t reg);
 };
 
 #endif
